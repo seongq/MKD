@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
     p.add_argument('--seed', type=int, default=1)
-    p.add_argument('--data_path', type=str, default='/processed_Yoon/IEMOCAP/seven_category_120/folds/fold01')
+    p.add_argument('--data_path', type=str, default='/content/drive/MyDrive/emotion/data-processed-icassp-20/IEMOCAP/seven_category_120/folds/fold01')
     p.add_argument('--batch_size', type=int, default=32)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--rnntype', type=str, default='gru')
@@ -104,14 +104,21 @@ if __name__ == '__main__':
     random.seed(params.seed)
 
     # get train data
+    print("실행중임")
     from sklearn.preprocessing import StandardScaler
     scaler_mfcc = StandardScaler()
+    #scaler_mfcc 작동전
     x_text, x_vid, vid_seq, x_mfcc, x_pros, aud_seq, labels = get_text_video_audio_data(params.data_path, 'train')
+    #dataset 불러옴
     s1 = x_mfcc.shape[1]
     s2 = x_mfcc.shape[2]
     x_mfcc = np.reshape(x_mfcc, [x_mfcc.shape[0], -1])
+    #scalser mfcc fit 작동전
     scaler_mfcc.fit(x_mfcc)
+    #scalser mfcc fit 작동후
+    #scalser mfcc transform 작동전
     scaler_mfcc.transform(x_mfcc)
+    #scalser mfcc fit 작동후
     x_mfcc = np.reshape(x_mfcc, [x_mfcc.shape[0], s1, s2])
     train_dataset = TensorDataset([torch.Tensor(x_text).float().to('cuda'), torch.Tensor(x_vid).float().to('cuda'),
                                    torch.Tensor(vid_seq).int().to('cuda'), torch.Tensor(x_mfcc).float().to('cuda'),
@@ -119,6 +126,8 @@ if __name__ == '__main__':
                                    torch.Tensor(labels).long().to('cuda')])
     train_loader = DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True)
     params.n_train = len(x_text)
+
+    print("트레인 부러옴")
     # get dev data
     x_text, x_vid, vid_seq, x_mfcc, x_pros, aud_seq, labels = get_text_video_audio_data(params.data_path, 'dev')
     x_mfcc = np.reshape(x_mfcc, [x_mfcc.shape[0], -1])
@@ -130,6 +139,7 @@ if __name__ == '__main__':
                                    torch.Tensor(labels).long().to('cuda')])
     dev_loader = DataLoader(dev_dataset, batch_size=params.batch_size, shuffle=False)
     params.n_dev = len(x_text)
+    print("dev 불러옴")
     # get test data
     x_text, x_vid, vid_seq, x_mfcc, x_pros, aud_seq, labels = get_text_video_audio_data(params.data_path, 'test')
     x_mfcc = np.reshape(x_mfcc, [x_mfcc.shape[0], -1])
@@ -141,6 +151,8 @@ if __name__ == '__main__':
                                  torch.Tensor(labels).long().to('cuda')])
     test_loader = DataLoader(test_dataset, batch_size=params.batch_size, shuffle=False)
     params.n_test = len(x_text)
+
+    print("test 불러옴")
     # train
     params.num_epochs = 20000 # give a random big number
     params.when = 10 # reduce LR patience

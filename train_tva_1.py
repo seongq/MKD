@@ -97,11 +97,11 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         print('Valid WA {:5.4f} | UWA {:5.4f} | WP {:5.4f} | UWP {:5.4f}'.format(val_wa, val_uwa, val_wp, val_uwp))
         print('Test WA {:5.4f} | UWA {:5.4f} | WP {:5.4f} | UWP {:5.4f}'.format(tst_wa, tst_uwa, tst_wp, tst_uwp))
         print("-" * 50)
-        sys.stdout.flush()
+        
         # if val_loss < best_valid:
         if val_uwa > best_val_uwa:
             print("Saved model at epoch: ", epoch)
-            save_model(tva_model, name='pre_trained_models/final_exp.pth')
+            save_model(tva_model, name='models/final_exp.pth')
             # best_valid = val_loss
             best_val_uwa = val_uwa
             es = 0
@@ -110,7 +110,7 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
             if es >= 10:
                 break
     #"""
-    model = load_model(name='pre_trained_models/final_exp.pth')
+    model = load_model(name='models/final_exp.pth')
     _, results, truths, ints = evaluate(model, criterion, test=True)
     results = torch.argmax(results, dim=1)
     truths = truths.cpu().numpy()
@@ -134,7 +134,7 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
     print("unweighted precision:", uwp)
     # import pdb
     # pdb.set_trace()
-    sys.stdout.flush()
+    
     # import numpy as np
     # np.save('ints.npy',ints)
     # np.save('labels.npy',truths)
