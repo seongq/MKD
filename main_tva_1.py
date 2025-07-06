@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from torchnet.dataset import TensorDataset
 import train_tva_1
 import random
-
+print("test중")
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
