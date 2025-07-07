@@ -32,10 +32,13 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         epoch_loss_total = 0
         tva_model_.train()
         for i_batch, batch_X in enumerate(train_loader):
-            x_text, x_vid, vid_seqN, x_mfcc, x_pros, aud_seq, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3], batch_X[4], batch_X[5], batch_X[6]
+            x_text, x_vid, x_audio, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3]
+            # x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3], batch_X[4], batch_X[5], batch_X[6]
             tva_model_.zero_grad()
             batch_size = x_text.size(0)
-            preds, _ = tva_model_(x_text.double(), x_vid.double(), x_mfcc.double())#(x_text, x_vid, vid_seqN, x_mfcc, x_pros, aud_seq)
+            preds, _ = tva_model_(x_text.double(), x_vid.double(), x_audio.double())#(x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq)
+            # print("labels 출력")
+            # print(labels)
             raw_loss = criterion_(preds, labels)
             raw_loss.backward()
             #torch.nn.utils.clip_grad_norm_(tva_model_.parameters(), 0.01)
@@ -52,9 +55,10 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         ints_ = [] # intermediate embeddings
         with torch.no_grad():
             for i_batch, batch_X in enumerate(loader):
-                x_text, x_vid, vid_seqN, x_mfcc, x_pros, aud_seq, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3], batch_X[4], batch_X[5], batch_X[6]
+                x_text, x_vid, x_audio, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3]
+                # x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3], batch_X[4], batch_X[5], batch_X[6]
                 batch_size = x_text.size(0)
-                preds, x_int = tva_model_(x_text.double(), x_vid.double(), x_mfcc.double())#(x_text, x_vid, vid_seqN, x_mfcc, x_pros, aud_seq)
+                preds, x_int = tva_model_(x_text.double(), x_vid.double(), x_audio.double())#(x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq)
                 total_loss += criterion_(preds, labels).item() * batch_size
                 # Collect the results into dictionary
                 results_.append(preds)

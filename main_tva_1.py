@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
     p.add_argument('--seed', type=int, default=1)
-    p.add_argument('--data_path', type=str, default='/content/drive/MyDrive/emotion/data-processed-icassp-20/IEMOCAP/seven_category_120/folds/fold01')
+    p.add_argument('--data_path', type=str, default='/workspace/datasets/utteranceEMOTIOn/data-processed-icassp-20/IEMOCAP/seven_category_120/folds/fold01/')
     p.add_argument('--batch_size', type=int, default=32)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--rnntype', type=str, default='gru')
@@ -109,6 +109,9 @@ if __name__ == '__main__':
     scaler_mfcc = StandardScaler()
     #scaler_mfcc 작동전
     x_text, x_vid, vid_seq, x_mfcc, x_pros, aud_seq, labels = get_text_video_audio_data(params.data_path, 'train')
+    print(labels)
+    print(labels.shape)
+    print(type(labels))
     #dataset 불러옴
     s1 = x_mfcc.shape[1]
     s2 = x_mfcc.shape[2]
