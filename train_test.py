@@ -14,8 +14,18 @@ from dataset import *
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
+    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
     p.add_argument('--modals', type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
-    p.add_argument('--fusion', type=str, default='mean_std')
+    p.add_argument('--fusion', type=str, default="mean_std", help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
+    p.add_argument('--aux_fusion_tv',type=str, help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
+    p.add_argument('--aux_fusion_ta',type=str, help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
+    p.add_argument('--aux_fusion_va',type=str, help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
+
+    p.add_argument("--balancing", type=str, help="OGM(bimodal), OGM-GE(bimodal), PMR(bimodal), MMCOSINE")
+    p.add_argument("--balancing_aux_tv", type=str, help="OGM(bimodal), OGM-GE(bimodal), PMR(bimodal), MMCOSINE")
+    p.add_argument("--balancing_aux_ta", type=str, help="OGM(bimodal), OGM-GE(bimodal), PMR(bimodal), MMCOSINE")
+    p.add_argument("--balancing_aux_va", type=str, help="OGM(bimodal), OGM-GE(bimodal), PMR(bimodal), MMCOSINE")
+
     p.add_argument('--devmode', type=str, choices=('debugmode','siljunmode'))
     p.add_argument('--normalization', type=str2bool, default=False)
     p.add_argument('--seed', type=int, required=True)
@@ -117,6 +127,8 @@ if __name__ == '__main__':
     torch.backends.cudnn.benchmark = False
     random.seed(params.seed)
     
+    assert (set(params.aux_classifier).issubset(set(params.modals)))  
+
     # get train data
     print("실행중임")
     
