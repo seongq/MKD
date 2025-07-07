@@ -2,7 +2,8 @@ import torch
 import numpy as np
 import argparse
 from data_utils import *
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, Subset
+
 import train_tva_1
 import random
 import os
@@ -13,6 +14,9 @@ from dataset import *
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
+    p.add_argument('--modals', type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
+    p.add_argument('--fusion', type=str, default='mean_std')
+    p.add_argument('--devmode', type=str, choices=('debugmode','siljunmode'))
     p.add_argument('--normalization', type=str2bool, default=False)
     p.add_argument('--seed', type=int, required=True)
     p.add_argument("--folder",required=True, type=str, choices=('01', '02', '03', '04', '05'))
@@ -336,6 +340,13 @@ if __name__ == '__main__':
         train_dataset = MultimodalIEMOCAPDataset(train_folders, params.data_path, params)
         dev_dataset   = MultimodalIEMOCAPDataset(dev_folders,   params.data_path, params)
         test_dataset  = MultimodalIEMOCAPDataset(test_folders,  params.data_path, params)
+
+
+        if params.devmode == "debugmode":
+            train_dataset = Subset(train_dataset, list(range(10)))
+            dev_dataset = Subset(dev_dataset, list(range(10)))
+            test_dataset = Subset(test_dataset, list(range(10)))
+
 
         train_loader = DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True, num_workers=4)
         dev_loader   = DataLoader(dev_dataset,   batch_size=params.batch_size, shuffle=False, num_workers=4)

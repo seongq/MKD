@@ -122,7 +122,7 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         # if val_loss < best_valid:
         if val_uwa > best_val_uwa:
             print("Saved model at epoch: ", epoch)
-            save_model(tva_model, name='models/final_exp.pth')
+            save_model(tva_model, name='/content/drive/MyDrive/projects/MKD/models/final_exp.pth')
             # best_valid = val_loss
             best_val_uwa = val_uwa
             es = 0
@@ -131,7 +131,7 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
             if es >= 10:
                 break
     #"""
-    model = load_model(name='models/final_exp.pth')
+    model = load_model(name='/content/drive/MyDrive/projects/MKD/models/final_exp.pth')
     _, results, truths, ints = evaluate(model, criterion, test=True)
     results = torch.argmax(results, dim=1)
     truths = truths.cpu().numpy()
