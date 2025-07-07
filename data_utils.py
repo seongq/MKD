@@ -3,67 +3,6 @@ import torch
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 
-def get_text_video_audio_data(data_path, part='train'):
-    if part == 'train':
-        x_txt = np.load(data_path+'/'+'train_text.npy')
-        x_vid = np.load(data_path+'/'+'train_video.npy')
-        vid_seqN = np.load(data_path+'/'+'train_video_seqN.npy')
-        x_mfcc = np.load(data_path+'/'+'train_audio_mfcc.npy')
-        x_pros = np.load(data_path + '/' + 'train_audio_prosody.npy')
-        aud_seqN = np.load(data_path + '/' + 'train_audio_seqN.npy')
-        labels = np.load(data_path+'/'+'train_label.npy')
-        if np.where(vid_seqN == 0)[0].any():
-            tr_inds = np.where(vid_seqN == 0)
-            vid_seqN = np.delete(vid_seqN, tr_inds, 0)
-            x_vid = np.delete(x_vid, tr_inds, 0)
-            x_txt = np.delete(x_txt, tr_inds, 0)
-            x_mfcc = np.delete(x_mfcc, tr_inds, 0)
-            x_pros = np.delete(x_pros, tr_inds, 0)
-            aud_seqN = np.delete(aud_seqN, tr_inds, 0)
-            labels = np.delete(labels, tr_inds, 0)
-    elif part == 'dev':
-        x_txt = np.load(data_path + '/' + 'dev_text.npy')
-        x_vid = np.load(data_path+'/'+'dev_video.npy')
-        vid_seqN = np.load(data_path+'/'+'dev_video_seqN.npy')
-        x_mfcc = np.load(data_path + '/' + 'dev_audio_mfcc.npy')
-        x_pros = np.load(data_path + '/' + 'dev_audio_prosody.npy')
-        aud_seqN = np.load(data_path + '/' + 'dev_audio_seqN.npy')
-        labels = np.load(data_path+'/'+'dev_label.npy')
-        if np.where(vid_seqN == 0)[0].any():
-            inds = np.where(vid_seqN == 0)
-            vid_seqN = np.delete(vid_seqN, inds)
-            x_vid = np.delete(x_vid, inds, 0)
-            x_txt = np.delete(x_txt, inds, 0)
-            x_mfcc = np.delete(x_mfcc, inds, 0)
-            x_pros = np.delete(x_pros, inds, 0)
-            aud_seqN = np.delete(aud_seqN, inds, 0)
-            labels = np.delete(labels, inds)
-    elif part == 'test':
-        x_txt = np.load(data_path + '/' + 'test_text.npy')
-        x_vid = np.load(data_path+'/'+'test_video.npy')
-        vid_seqN = np.load(data_path+'/'+'test_video_seqN.npy')
-        x_mfcc = np.load(data_path + '/' + 'test_audio_mfcc.npy')
-        x_pros = np.load(data_path + '/' + 'test_audio_prosody.npy')
-        aud_seqN = np.load(data_path + '/' + 'test_audio_seqN.npy')
-        labels = np.load(data_path+'/'+'test_label.npy')
-        if np.where(vid_seqN == 0)[0].any():
-            inds = np.where(vid_seqN == 0)
-            vid_seqN = np.delete(vid_seqN, inds)
-            x_vid = np.delete(x_vid, inds, 0)
-            x_txt = np.delete(x_txt, inds, 0)
-            x_mfcc = np.delete(x_mfcc, inds, 0)
-            x_pros = np.delete(x_pros, inds, 0)
-            aud_seqN = np.delete(aud_seqN, inds, 0)
-            labels = np.delete(labels, inds)
-    else:
-        x_txt = []
-        x_vid = []
-        vid_seqN = []
-        x_mfcc = []
-        x_pros = []
-        aud_seqN = []
-        labels = []
-    return x_txt, x_vid, vid_seqN, x_mfcc, x_pros, aud_seqN, labels
 
 def save_model(model, name):
     torch.save(model, name)
