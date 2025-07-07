@@ -14,7 +14,7 @@ from dataset import *
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
-    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
+    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva', "NOOO"))
     p.add_argument('--modals', type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
     p.add_argument('--fusion', type=str, default="mean_std", help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
     p.add_argument('--aux_fusion_tv',type=str, help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
