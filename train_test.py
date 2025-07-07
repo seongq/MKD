@@ -6,12 +6,14 @@ from torch.utils.data import DataLoader, TensorDataset
 import train_tva_1
 import random
 import os
+from dataset import *
 # print("test중")
 
 
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
+    p.add_argument('--normalization', type=str2bool, default=False)
     p.add_argument('--seed', type=int, required=True)
     p.add_argument("--folder",required=True, type=str, choices=('01', '02', '03', '04', '05'))
     p.add_argument('--data_path', type=str, default='/content/drive/MyDrive/projects/database/IEMOCAP_mypc20250707/IEMOCAP_baseline_iscross')
@@ -110,11 +112,10 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     random.seed(params.seed)
-
+    
     # get train data
     print("실행중임")
-    from sklearn.preprocessing import StandardScaler
-    scaler_audio = StandardScaler()
+    
     
     # 
     
@@ -122,16 +123,15 @@ if __name__ == '__main__':
     
     id_to_numberid_path = "/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/seven_C_id_label.txt"
 
+    ids_number_in_folder = f"/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/folds/fold{params.folder}/fold{params.folder}_id.txt"
+
     with open(id_to_numberid_path,'r') as f:
         lines = f.readlines()
 
     # 각 줄에서 \n 제거하고 \t 기준으로 나누기
     str_ids = [line.strip().split('\t')[0] for line in lines]
 
-    type(str_ids)
-    
-    
-    ids_number_in_folder = f"/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/folds/fold{params.folder}/fold{params.folder}_id.txt"
+ 
     
     
     with open(ids_number_in_folder, 'r') as f:
@@ -156,146 +156,207 @@ if __name__ == '__main__':
     train_folders = [str_ids[i] for i in ids['train']]
     dev_folders =  [str_ids[i] for i in ids['dev']]
     test_folders =  [str_ids[i] for i in ids['test']]
-    
-    TRAIN_AUDIOFEATURES = []
-    TRAIN_VIDEOFEATURES = []
-    TRAIN_TEXTFEATURES = []
-    TRAIN_LABELS = []
-    for name in train_folders:
-        audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
-        videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
-        textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
-        with open(os.path.join(params.data_path, name, "label", 'sample.txt')) as f:
-            label = f.read()
-            label = int(label)
-            # print(label)
-        
-        TRAIN_LABELS.append(label)
-            
-        TRAIN_AUDIOFEATURES.append(audiofeature)
-        TRAIN_VIDEOFEATURES.append(videofeature)
-        TRAIN_TEXTFEATURES.append(textfeature)
-    TRAIN_AUDIOFEATURES = np.stack(TRAIN_AUDIOFEATURES, axis=0)
-    TRAIN_VIDEOFEATURES = np.stack(TRAIN_VIDEOFEATURES, axis=0)
-    TRAIN_TEXTFEATURES = np.stack(TRAIN_TEXTFEATURES, axis=0)
-    TRAIN_LABELS = np.stack(TRAIN_LABELS,axis=0)
-  
-  
-  
-    dev_AUDIOFEATURES = []
-    dev_VIDEOFEATURES = []
-    dev_TEXTFEATURES = []
-    dev_LABELS = []
-    for name in dev_folders:
-        audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
-        videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
-        textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
-        with open(os.path.join(params.data_path, name, "label", 'sample.txt')) as f:
-            label = f.read()
-            label = int(label)
-            # print(label)
-        
-        dev_LABELS.append(label)
-            
-        dev_AUDIOFEATURES.append(audiofeature)
-        dev_VIDEOFEATURES.append(videofeature)
-        dev_TEXTFEATURES.append(textfeature)
-    dev_AUDIOFEATURES = np.stack(dev_AUDIOFEATURES, axis=0)
-    dev_VIDEOFEATURES = np.stack(dev_VIDEOFEATURES, axis=0)
-    dev_TEXTFEATURES = np.stack(dev_TEXTFEATURES, axis=0)
-    dev_LABELS = np.stack(dev_LABELS,axis=0)
-    
-  
-    
-    test_AUDIOFEATURES = []
-    test_VIDEOFEATURES = []
-    test_TEXTFEATURES = []
-    test_LABELS = []
-    for name in test_folders:
-        audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
-        videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
-        textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
-        with open(os.path.join(params.data_path, name, "label", 'sample.txt')) as f:
-            label = f.read()
-            label = int(label)
-            # print(label)
-        
-        test_LABELS.append(label)
-            
-        test_AUDIOFEATURES.append(audiofeature)
-        test_VIDEOFEATURES.append(videofeature)
-        test_TEXTFEATURES.append(textfeature)
-    test_AUDIOFEATURES = np.stack(test_AUDIOFEATURES, axis=0)
-    test_VIDEOFEATURES = np.stack(test_VIDEOFEATURES, axis=0)
-    test_TEXTFEATURES = np.stack(test_TEXTFEATURES, axis=0)
-    test_LABELS = np.stack(test_LABELS,axis=0)
-   
-    
-    s1 = TRAIN_AUDIOFEATURES.shape[1]
-    s2 = TRAIN_AUDIOFEATURES.shape[2]
-    TRAIN_AUDIOFEATURES = np.reshape(TRAIN_AUDIOFEATURES, [TRAIN_AUDIOFEATURES.shape[0], -1])
-    scaler_audio.fit(TRAIN_AUDIOFEATURES)
-    
-    
-    scaler_audio.transform(TRAIN_AUDIOFEATURES)
-    TRAIN_AUDIOFEATURES = np.reshape(TRAIN_AUDIOFEATURES, [TRAIN_AUDIOFEATURES.shape[0], s1,s2])
-    
-    train_dataset = TensorDataset([torch.Tensor(TRAIN_TEXTFEATURES).float().to('cuda'),
-                                   torch.Tensor(TRAIN_VIDEOFEATURES).float().to('cuda'),
-                                   torch.Tensor(TRAIN_AUDIOFEATURES).float().to('cuda'),
-                                   torch.Tensor(TRAIN_LABELS).long().to('cuda')])
-    train_loader = DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True)
-    
-    
-    
-    
-    dev_AUDIOFEATURES = np.reshape(dev_AUDIOFEATURES, [dev_AUDIOFEATURES.shape[0], -1])
-    scaler_audio.transform(dev_AUDIOFEATURES)
-    dev_AUDIOFEATURES = np.reshape(dev_AUDIOFEATURES, [dev_AUDIOFEATURES.shape[0], s1,s2])
-    
-    dev_dataset = TensorDataset([torch.Tensor(dev_TEXTFEATURES).float().to('cuda'),
-                                 torch.Tensor(dev_VIDEOFEATURES).float().to('cuda'),
-                                 torch.Tensor(dev_AUDIOFEATURES).float().to('cuda'),
-                                 torch.Tensor(dev_LABELS).long().to('cuda')])
-    dev_loader = DataLoader(dev_dataset, batch_size=params.batch_size, shuffle=False)
-    
-    
-    test_AUDIOFEATURES = np.reshape(test_AUDIOFEATURES, [test_AUDIOFEATURES.shape[0], -1])
-    scaler_audio.transform(test_AUDIOFEATURES)
-    test_AUDIOFEATURES = np.reshape(test_AUDIOFEATURES, [test_AUDIOFEATURES.shape[0], s1,s2])
-    
-    test_dataset = TensorDataset([torch.Tensor(test_TEXTFEATURES).float().to('cuda'),
-                                  torch.Tensor(test_VIDEOFEATURES).float().to('cuda'),
-                                  torch.Tensor(test_AUDIOFEATURES).float().to('cuda'),
-                                  torch.Tensor(test_LABELS).long().to('cuda')])
-    test_loader = DataLoader(test_dataset, batch_size=params.batch_size, shuffle=False)
-    
-    
-    
-    
-    
-    
-    
-    
-    params.n_train = len(TRAIN_TEXTFEATURES)
 
-  
-    params.n_dev = len(dev_TEXTFEATURES)
+
+    if params.normalization:
+
+        from sklearn.preprocessing import StandardScaler
+        scaler_audio = StandardScaler()
+
+
+        print("train set 불러오기")
+        TRAIN_AUDIOFEATURES = []
+        TRAIN_VIDEOFEATURES = []
+        TRAIN_TEXTFEATURES = []
+        TRAIN_LABELS = []
+        for i,name in enumerate(train_folders):
+            if i // 100 == 0:
+                print(f'{i} 번째 불러오기')
+            audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
+            videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
+            textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
+            with open(os.path.join(params.data_path, name, "label", 'sample.txt')) as f:
+                label = f.read()
+                label = int(label)
+                # print(label)
+            
+            TRAIN_LABELS.append(label)
+                
+            TRAIN_AUDIOFEATURES.append(audiofeature)
+            TRAIN_VIDEOFEATURES.append(videofeature)
+            TRAIN_TEXTFEATURES.append(textfeature)
+        TRAIN_AUDIOFEATURES = np.stack(TRAIN_AUDIOFEATURES, axis=0)
+        TRAIN_VIDEOFEATURES = np.stack(TRAIN_VIDEOFEATURES, axis=0)
+        TRAIN_TEXTFEATURES = np.stack(TRAIN_TEXTFEATURES, axis=0)
+        TRAIN_LABELS = np.stack(TRAIN_LABELS,axis=0)
     
-    params.n_test = len(test_TEXTFEATURES)
+    
+        pirint("train set 불러옴")
+        print("dev set 불러오는중")
+        dev_AUDIOFEATURES = []
+        dev_VIDEOFEATURES = []
+        dev_TEXTFEATURES = []
+        dev_LABELS = []
+        for name in dev_folders:
+            audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
+            videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
+            textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
+            with open(os.path.join(params.data_path, name, "label", 'sample.txt')) as f:
+                label = f.read()
+                label = int(label)
+                # print(label)
+            
+            dev_LABELS.append(label)
+                
+            dev_AUDIOFEATURES.append(audiofeature)
+            dev_VIDEOFEATURES.append(videofeature)
+            dev_TEXTFEATURES.append(textfeature)
+        dev_AUDIOFEATURES = np.stack(dev_AUDIOFEATURES, axis=0)
+        dev_VIDEOFEATURES = np.stack(dev_VIDEOFEATURES, axis=0)
+        dev_TEXTFEATURES = np.stack(dev_TEXTFEATURES, axis=0)
+        dev_LABELS = np.stack(dev_LABELS,axis=0)
+        print("dev set 불러옴")
+
+
+        print('test set 불러오는중')
+    
+        
+        test_AUDIOFEATURES = []
+        test_VIDEOFEATURES = []
+        test_TEXTFEATURES = []
+        test_LABELS = []
+        for name in test_folders:
+            print('name 불렁오기')
+            audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
+            videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
+            textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
+            with open(os.path.join(params.data_path, name, "label", 'sample.txt')) as f:
+                label = f.read()
+                label = int(label)
+                # print(label)
+            
+            test_LABELS.append(label)
+                
+            test_AUDIOFEATURES.append(audiofeature)
+            test_VIDEOFEATURES.append(videofeature)
+            test_TEXTFEATURES.append(textfeature)
+        test_AUDIOFEATURES = np.stack(test_AUDIOFEATURES, axis=0)
+        test_VIDEOFEATURES = np.stack(test_VIDEOFEATURES, axis=0)
+        test_TEXTFEATURES = np.stack(test_TEXTFEATURES, axis=0)
+        test_LABELS = np.stack(test_LABELS,axis=0)
+        
+        print('test set 불러옴')
+        
+        s1 = TRAIN_AUDIOFEATURES.shape[1]
+        s2 = TRAIN_AUDIOFEATURES.shape[2]
+        TRAIN_AUDIOFEATURES = np.reshape(TRAIN_AUDIOFEATURES, [TRAIN_AUDIOFEATURES.shape[0], -1])
+        
+        print('scaler 작업중')
+        scaler_audio.fit(TRAIN_AUDIOFEATURES)
+        
+        
+        scaler_audio.transform(TRAIN_AUDIOFEATURES)
+        TRAIN_AUDIOFEATURES = np.reshape(TRAIN_AUDIOFEATURES, [TRAIN_AUDIOFEATURES.shape[0], s1,s2])
+        
+        print('trainset scaler로 작업완료')
+        train_dataset = TensorDataset([torch.Tensor(TRAIN_TEXTFEATURES).float().to('cuda'),
+                                    torch.Tensor(TRAIN_VIDEOFEATURES).float().to('cuda'),
+                                    torch.Tensor(TRAIN_AUDIOFEATURES).float().to('cuda'),
+                                    torch.Tensor(TRAIN_LABELS).long().to('cuda')])
+        train_loader = DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True)
+        
+        
+        
+        
+        dev_AUDIOFEATURES = np.reshape(dev_AUDIOFEATURES, [dev_AUDIOFEATURES.shape[0], -1])
+        scaler_audio.transform(dev_AUDIOFEATURES)
+        dev_AUDIOFEATURES = np.reshape(dev_AUDIOFEATURES, [dev_AUDIOFEATURES.shape[0], s1,s2])
+        print('dev set scaler로 작업완료')
+        dev_dataset = TensorDataset([torch.Tensor(dev_TEXTFEATURES).float().to('cuda'),
+                                    torch.Tensor(dev_VIDEOFEATURES).float().to('cuda'),
+                                    torch.Tensor(dev_AUDIOFEATURES).float().to('cuda'),
+                                    torch.Tensor(dev_LABELS).long().to('cuda')])
+        dev_loader = DataLoader(dev_dataset, batch_size=params.batch_size, shuffle=False)
+        
+        
+        test_AUDIOFEATURES = np.reshape(test_AUDIOFEATURES, [test_AUDIOFEATURES.shape[0], -1])
+        scaler_audio.transform(test_AUDIOFEATURES)
+        test_AUDIOFEATURES = np.reshape(test_AUDIOFEATURES, [test_AUDIOFEATURES.shape[0], s1,s2])
+        print('test set scaler로 작업완료')
+        test_dataset = TensorDataset([torch.Tensor(test_TEXTFEATURES).float().to('cuda'),
+                                    torch.Tensor(test_VIDEOFEATURES).float().to('cuda'),
+                                    torch.Tensor(test_AUDIOFEATURES).float().to('cuda'),
+                                    torch.Tensor(test_LABELS).long().to('cuda')])
+        test_loader = DataLoader(test_dataset, batch_size=params.batch_size, shuffle=False)
+        
+        
+        
+        
+        
+        
+        
+        
+        params.n_train = len(TRAIN_TEXTFEATURES)
 
     
-    params.num_epochs = 20000 # give a random big number
-    params.when = 10 # reduce LR patience
-    params.txt_dim = 300
-    params.vid_dim = 2048
-    params.aud_dim = 120
-    params.pros_dim = 35
-    count = 0
-    import sys
-    test_loss = train_tva_1.initiate(params, train_loader, dev_loader, test_loader)    
-    
-    
+        params.n_dev = len(dev_TEXTFEATURES)
+        
+        params.n_test = len(test_TEXTFEATURES)
+
+        
+        params.num_epochs = 20000 # give a random big number
+        params.when = 10 # reduce LR patience
+        params.txt_dim = 300
+        params.vid_dim = 2048
+        params.aud_dim = 120
+        params.pros_dim = 35
+        count = 0
+        import sys
+
+        print("학습시작")
+        test_loss = train_tva_1.initiate(params, train_loader, dev_loader, test_loader)    
+    else:
+        print('pass')
+        # label index -> folder name 매핑
+        with open(id_to_numberid_path, 'r') as f:
+            str_ids = [line.strip().split('\t')[0] for line in f.readlines()]
+
+        # fold 분할
+        with open(ids_number_in_folder, 'r') as f:
+            lines = [line.strip() for line in f.readlines()]
+            train_ids = [int(i) for i in lines[0].split()]
+            dev_ids = [int(i) for i in lines[1].split()]
+            test_ids = [int(i) for i in lines[2].split()]
+
+        train_folders = [str_ids[i] for i in train_ids]
+        dev_folders   = [str_ids[i] for i in dev_ids]
+        test_folders  = [str_ids[i] for i in test_ids]
+
+        # Dataset & DataLoader 생성
+        train_dataset = MultimodalIEMOCAPDataset(train_folders, params.data_path, params)
+        dev_dataset   = MultimodalIEMOCAPDataset(dev_folders,   params.data_path, params)
+        test_dataset  = MultimodalIEMOCAPDataset(test_folders,  params.data_path, params)
+
+        train_loader = DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True, num_workers=4)
+        dev_loader   = DataLoader(dev_dataset,   batch_size=params.batch_size, shuffle=False, num_workers=4)
+        test_loader  = DataLoader(test_dataset,  batch_size=params.batch_size, shuffle=False, num_workers=4)
+        
+        params.n_train = len(train_dataset)
+        params.n_dev = len(dev_dataset)
+        params.n_test = len(test_dataset)
+
+
+        params.num_epochs = 20000 # give a random big number
+        params.when = 10 # reduce LR patience
+        params.txt_dim = 300
+        params.vid_dim = 2048
+        params.aud_dim = 120
+        params.pros_dim = 35  # 쓰이지 않으면 제거해도 됨
+        count = 0
+
+        print("학습시작")
+        test_loss = train_tva_1.initiate(params, train_loader, dev_loader, test_loader)
+            
     
     
     

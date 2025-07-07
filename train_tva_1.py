@@ -34,6 +34,13 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         for i_batch, batch_X in enumerate(train_loader):
             x_text, x_vid, x_audio, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3]
             # x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3], batch_X[4], batch_X[5], batch_X[6]
+
+            x_text = x_text.to('cuda').double()
+            x_vid = x_vid.to('cuda').double()
+            x_audio = x_audio.to('cuda').double()
+            labels = labels.to('cuda')
+
+
             tva_model_.zero_grad()
             batch_size = x_text.size(0)
             preds, _ = tva_model_(x_text.double(), x_vid.double(), x_audio.double())#(x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq)
@@ -44,6 +51,8 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
             #torch.nn.utils.clip_grad_norm_(tva_model_.parameters(), 0.01)
             optimizer_.step()
             epoch_loss_total += raw_loss.item() * batch_size
+            if i_batch % 20 == 0:
+                print(f"  🌀 [Epoch {epoch} | Batch {i_batch}/{len(train_loader)}] Loss: {raw_loss.item():.4f}")
         return epoch_loss_total / hyp_params.n_train
 
     def evaluate(tva_model_, criterion_, test=False):
@@ -56,6 +65,14 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         with torch.no_grad():
             for i_batch, batch_X in enumerate(loader):
                 x_text, x_vid, x_audio, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3]
+
+
+                x_text = x_text.to('cuda').double()
+                x_vid = x_vid.to('cuda').double()
+                x_audio = x_audio.to('cuda').double()
+                labels = labels.to('cuda')
+
+
                 # x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq, labels = batch_X[0], batch_X[1], batch_X[2], batch_X[3], batch_X[4], batch_X[5], batch_X[6]
                 batch_size = x_text.size(0)
                 preds, x_int = tva_model_(x_text.double(), x_vid.double(), x_audio.double())#(x_text, x_vid, vid_seqN, x_audio, x_pros, aud_seq)
