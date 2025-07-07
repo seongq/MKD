@@ -2,8 +2,7 @@ import torch
 import numpy as np
 import argparse
 from data_utils import *
-from torch.utils.data import DataLoader
-from torchnet.dataset import TensorDataset
+from torch.utils.data import DataLoader, TensorDataset
 import train_tva_1
 import random
 import os
@@ -14,8 +13,8 @@ if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
     p.add_argument('--seed', type=int, required=True)
-    p.add_argument("--folder",type=str, choices=('01', '02', '03', '04', '05'))
-    p.add_argument('--data_path', type=str, default='/workspace/datasets/MKD_dataset/IEMOCAP_baseline_iscross')
+    p.add_argument("--folder",required=True, type=str, choices=('01', '02', '03', '04', '05'))
+    p.add_argument('--data_path', type=str, default='/content/drive/MyDrive/projects/database/IEMOCAP_mypc20250707/IEMOCAP_baseline_iscross')
     p.add_argument('--batch_size', type=int, default=32)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--rnntype', type=str, default='gru')
@@ -121,7 +120,7 @@ if __name__ == '__main__':
     
     
     
-    id_to_numberid_path = "/workspace/datasets/utteranceEMOTIOn/data-processed-icassp-20/IEMOCAP/seven_category_120/seven_C_id_label.txt"
+    id_to_numberid_path = "/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/seven_C_id_label.txt"
 
     with open(id_to_numberid_path,'r') as f:
         lines = f.readlines()
@@ -132,7 +131,7 @@ if __name__ == '__main__':
     type(str_ids)
     
     
-    ids_number_in_folder = f"/workspace/datasets/utteranceEMOTIOn/data-processed-icassp-20/IEMOCAP/seven_category_120/folds/fold{params.folder}/fold{params.folder}_id.txt"
+    ids_number_in_folder = f"/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/folds/fold{params.folder}/fold{params.folder}_id.txt"
     
     
     with open(ids_number_in_folder, 'r') as f:
