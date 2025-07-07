@@ -300,7 +300,7 @@ if __name__ == '__main__':
     
     
     
-    sessions = ['01', '02', '03', '04', '05']
+    # sessions = ['01', '02', '03', '04', '05']
     # sessions.remove(params.test_session)
     
     # dev_session = random.choice(sessions)
