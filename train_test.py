@@ -6,16 +6,16 @@ from torch.utils.data import DataLoader
 from torchnet.dataset import TensorDataset
 import train_tva_1
 import random
+import os
 # print("test중")
 
 
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
-    p.add_argument('--seed', type=int, default=1)
-    p.add_argument("--folder",type=str)
+    p.add_argument('--seed', type=int, required=True)
+    p.add_argument("--folder",type=str, choices=('01', '02', '03', '04', '05'))
     p.add_argument('--data_path', type=str, default='/workspace/datasets/MKD_dataset/IEMOCAP_baseline_iscross')
-    p.add_argument('--test_session', type=str, choices = ['01', '02', '03', '04', '05'], default='01', required=True)
     p.add_argument('--batch_size', type=int, default=32)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--rnntype', type=str, default='gru')
@@ -117,29 +117,7 @@ if __name__ == '__main__':
     from sklearn.preprocessing import StandardScaler
     scaler_audio = StandardScaler()
     
-    sessions = ['01', '02', '03', '04', '05']
-    sessions.remove(params.test_session)
-    
-    dev_session = random.choice(sessions)
-    # print(sessions)
-    sessions.remove(dev_session)
-    
-    # print(dev_session)
-    # print(sessions)
-    import os
-    test_session = params.test_session
-    train_sessions = sessions
-    
-    assert not (test_session in train_sessions)
-    assert not (dev_session in train_sessions)
-    assert not (dev_session == test_session)
-    subfolders = [name for name in os.listdir(params.data_path)
-              if os.path.isdir(os.path.join(params.data_path, name))]
-
-    train_folders = [name for name in subfolders if name[3:5] in train_sessions ]
-    dev_folders =  [name for name in subfolders if name[3:5] == dev_session]
-    test_folders =  [name for name in subfolders if name[3:5] == test_session]
-    
+    # 
     
     
     
@@ -318,4 +296,30 @@ if __name__ == '__main__':
     import sys
     test_loss = train_tva_1.initiate(params, train_loader, dev_loader, test_loader)    
     
+    
+    
+    
+    
+    sessions = ['01', '02', '03', '04', '05']
+    # sessions.remove(params.test_session)
+    
+    # dev_session = random.choice(sessions)
+    # # print(sessions)
+    # sessions.remove(dev_session)
+    
+    # # print(dev_session)
+    # # print(sessions)
+    # import os
+    # test_session = params.test_session
+    # train_sessions = sessions
+    
+    # assert not (test_session in train_sessions)
+    # assert not (dev_session in train_sessions)
+    # assert not (dev_session == test_session)
+    # subfolders = [name for name in os.listdir(params.data_path)
+    #           if os.path.isdir(os.path.join(params.data_path, name))]
+
+    # train_folders = [name for name in subfolders if name[3:5] in train_sessions ]
+    # dev_folders =  [name for name in subfolders if name[3:5] == dev_session]
+    # test_folders =  [name for name in subfolders if name[3:5] == test_session]
     
