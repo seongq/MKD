@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from data_utils import save_model, load_model, weighted_accuracy, unweighted_accuracy, weighted_precision, unweighted_precision
 import sys
-
+import os
 def initiate(hyp_params, train_loader, dev_loader, test_loader):
     tva_model = getattr(models, 'TVAModel_Self')(hyp_params)
     tva_model = tva_model.double().to('cuda')
@@ -105,6 +105,8 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
     best_val_uwa = 0
     es = 0
     #"""
+    
+    pth_dir_path =
     for epoch in range(1, hyp_params.num_epochs + 1):
         train_total_loss = train(tva_model, criterion, optimizer)
         val_loss, val_res, val_tru, _ = evaluate(tva_model, criterion, test=False)
@@ -122,7 +124,11 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         # if val_loss < best_valid:
         if val_uwa > best_val_uwa:
             print("Saved model at epoch: ", epoch)
-            save_model(tva_model, name='/workspace/MKD/models/final_exp.pth')
+            
+            folders_path = f"/workspace/MKD/models/normalization_{hyp_params.normalization}/fold{hyp_params.folder}"
+            os.makedirs(name=folders_path, exist_ok=True)
+            model_path =os.path.join(folders_path, "final_exp.pth")
+            save_model(tva_model, name=model_path)
             # best_valid = val_loss
             best_val_uwa = val_uwa
             es = 0
@@ -131,7 +137,7 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
             if es >= 10:
                 break
     #"""
-    model = load_model(name='/workspace/MKD/models/final_exp.pth')
+    model = load_model(name=model_path)
     _, results, truths, ints = evaluate(model, criterion, test=True)
     results = torch.argmax(results, dim=1)
     truths = truths.cpu().numpy()
