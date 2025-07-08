@@ -123,11 +123,32 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
         print('Test WA {:5.4f} | UWA {:5.4f} | WP {:5.4f} | UWP {:5.4f}'.format(tst_wa, tst_uwa, tst_wp, tst_uwp))
         print("-" * 50)
         
+        params_dict = vars(hyp_params)
+        epoch_info = {'epoch': epoch}
+        val_metrics = {
+            "wa": val_wa,
+            "uwa": val_uwa,
+            "wp": val_wp,
+            "uwp": val_uwp,
+        }
+
+        record = {**params_dict, **val_metrics, **epoch_info}
+
+        csv_path = os.path.join("results.csv")
+        write_header = not os.path.exists(csv_path)
+
+        with open(csv_path, 'a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=record.keys())
+            if write_header:
+                writer.writeheader()
+            writer.writerow(record)
+        
+        
         # if val_loss < best_valid:
         if val_uwa > best_val_uwa:
             print("Saved model at epoch: ", epoch)
             
-            folders_path = os.path.join(pth_dir_path,'normalization',str(hyp_params.normalization), f"fold{hyp_params.folder}")
+            folders_path = os.path.join(pth_dir_path,'normalization',str(hyp_params.normalization), f"fold{hyp_params.folder}", f"seed{hyp_params.seed}")
             os.makedirs(name=folders_path, exist_ok=True)
             model_path =os.path.join(folders_path, "final_exp.pth")
             save_model(tva_model, name=model_path)
@@ -165,13 +186,14 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
     
 
     params_dict = vars(hyp_params)
+    epochs = {'epoch' : 'final'}
     metrics = {
         "wa": wa,
         "uwa": uwa,
         "wp": wp,
         "uwp": uwp,
     }
-    record = {**params_dict, **metrics}
+    record = {**params_dict, **metrics, **epochs}
     csv_path = os.path.join("results.csv")
     write_header = not os.path.exists(csv_path)
     with open(csv_path, 'a', newline='') as f:
