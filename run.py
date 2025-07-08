@@ -1,7 +1,7 @@
 import subprocess
 import random
 
-devmodes = ["debugmode"]
+devmodes = ["siljunmode"]
 #debugmode, siljunmode
 normalizations = ["true", "false"]
 folders = ["01", "02", "03", "04", "05"]
