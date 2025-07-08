@@ -30,7 +30,7 @@ if __name__ == '__main__':
     p.add_argument('--normalization', type=str2bool, default=False)
     p.add_argument('--seed', type=int, required=True)
     p.add_argument("--folder",required=True, type=str, choices=('01', '02', '03', '04', '05'))
-    p.add_argument('--data_path', type=str, default='/content/drive/MyDrive/projects/database/IEMOCAP_mypc20250707/IEMOCAP_baseline_iscross')
+    p.add_argument('--data_path', type=str, default='/workspace/datasets/MKD_dataset/IEMOCAP_baseline_iscross')
     p.add_argument('--batch_size', type=int, default=32)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--rnntype', type=str, default='gru')
@@ -137,9 +137,9 @@ if __name__ == '__main__':
     
     
     
-    id_to_numberid_path = "/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/seven_C_id_label.txt"
+    id_to_numberid_path = "/workspace/datasets/utteranceEMOTIOn/data-processed-icassp-20/IEMOCAP/seven_category_120/seven_C_id_label.txt"
 
-    ids_number_in_folder = f"/content/drive/MyDrive/emotion/IEMOCAP_iscross/IEMOCAP/seven_category_120/folds/fold{params.folder}/fold{params.folder}_id.txt"
+    ids_number_in_folder = f"/workspace/datasets/utteranceEMOTIOn/data-processed-icassp-20/IEMOCAP/seven_category_120/folds/fold{params.folder}/fold{params.folder}_id.txt"
 
     with open(id_to_numberid_path,'r') as f:
         lines = f.readlines()
@@ -186,7 +186,7 @@ if __name__ == '__main__':
         TRAIN_TEXTFEATURES = []
         TRAIN_LABELS = []
         for i,name in enumerate(train_folders):
-            if i // 100 == 0:
+            if i % 100 == 0:
                 print(f'{i} 번째 불러오기')
             audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
             videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
@@ -207,7 +207,6 @@ if __name__ == '__main__':
         TRAIN_LABELS = np.stack(TRAIN_LABELS,axis=0)
     
     
-        pirint("train set 불러옴")
         print("dev set 불러오는중")
         dev_AUDIOFEATURES = []
         dev_VIDEOFEATURES = []
@@ -275,10 +274,10 @@ if __name__ == '__main__':
         TRAIN_AUDIOFEATURES = np.reshape(TRAIN_AUDIOFEATURES, [TRAIN_AUDIOFEATURES.shape[0], s1,s2])
         
         print('trainset scaler로 작업완료')
-        train_dataset = TensorDataset([torch.Tensor(TRAIN_TEXTFEATURES).float().to('cuda'),
+        train_dataset = TensorDataset(torch.Tensor(TRAIN_TEXTFEATURES).float().to('cuda'),
                                     torch.Tensor(TRAIN_VIDEOFEATURES).float().to('cuda'),
                                     torch.Tensor(TRAIN_AUDIOFEATURES).float().to('cuda'),
-                                    torch.Tensor(TRAIN_LABELS).long().to('cuda')])
+                                    torch.Tensor(TRAIN_LABELS).long().to('cuda'))
         train_loader = DataLoader(train_dataset, batch_size=params.batch_size, shuffle=True)
         
         
@@ -288,10 +287,10 @@ if __name__ == '__main__':
         scaler_audio.transform(dev_AUDIOFEATURES)
         dev_AUDIOFEATURES = np.reshape(dev_AUDIOFEATURES, [dev_AUDIOFEATURES.shape[0], s1,s2])
         print('dev set scaler로 작업완료')
-        dev_dataset = TensorDataset([torch.Tensor(dev_TEXTFEATURES).float().to('cuda'),
+        dev_dataset = TensorDataset(torch.Tensor(dev_TEXTFEATURES).float().to('cuda'),
                                     torch.Tensor(dev_VIDEOFEATURES).float().to('cuda'),
                                     torch.Tensor(dev_AUDIOFEATURES).float().to('cuda'),
-                                    torch.Tensor(dev_LABELS).long().to('cuda')])
+                                    torch.Tensor(dev_LABELS).long().to('cuda'))
         dev_loader = DataLoader(dev_dataset, batch_size=params.batch_size, shuffle=False)
         
         
@@ -299,10 +298,10 @@ if __name__ == '__main__':
         scaler_audio.transform(test_AUDIOFEATURES)
         test_AUDIOFEATURES = np.reshape(test_AUDIOFEATURES, [test_AUDIOFEATURES.shape[0], s1,s2])
         print('test set scaler로 작업완료')
-        test_dataset = TensorDataset([torch.Tensor(test_TEXTFEATURES).float().to('cuda'),
+        test_dataset = TensorDataset(torch.Tensor(test_TEXTFEATURES).float().to('cuda'),
                                     torch.Tensor(test_VIDEOFEATURES).float().to('cuda'),
                                     torch.Tensor(test_AUDIOFEATURES).float().to('cuda'),
-                                    torch.Tensor(test_LABELS).long().to('cuda')])
+                                    torch.Tensor(test_LABELS).long().to('cuda'))
         test_loader = DataLoader(test_dataset, batch_size=params.batch_size, shuffle=False)
         
         
@@ -320,7 +319,7 @@ if __name__ == '__main__':
         params.n_test = len(test_TEXTFEATURES)
 
         
-        params.num_epochs = 20000 # give a random big number
+        params.num_epochs = 2 # give a random big number
         params.when = 10 # reduce LR patience
         params.txt_dim = 300
         params.vid_dim = 2048
@@ -369,7 +368,7 @@ if __name__ == '__main__':
         params.n_test = len(test_dataset)
 
 
-        params.num_epochs = 20000 # give a random big number
+        params.num_epochs = 200000 # give a random big number
         params.when = 10 # reduce LR patience
         params.txt_dim = 300
         params.vid_dim = 2048

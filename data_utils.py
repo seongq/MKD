@@ -16,7 +16,7 @@ def save_model(model, name):
     torch.save(model, name)
 
 def load_model(name):
-    model = torch.load(name, weights_only=False)
+    model = torch.load(name)
     return model
 
 # taken from https://github.com/david-yoon/attentive-modality-hopping-for-SER
