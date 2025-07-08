@@ -172,7 +172,11 @@ if __name__ == '__main__':
     train_folders = [str_ids[i] for i in ids['train']]
     dev_folders =  [str_ids[i] for i in ids['dev']]
     test_folders =  [str_ids[i] for i in ids['test']]
-
+    if params.devmode == "debugmode":
+        train_folders = train_folders[0:10]
+        dev_folders = dev_folders[0:10]
+        test_folders = test_folders[0:10]
+        
 
     if params.normalization:
 
@@ -319,14 +323,13 @@ if __name__ == '__main__':
         params.n_test = len(test_TEXTFEATURES)
 
         
-        params.num_epochs = 2 # give a random big number
+        params.num_epochs = 2000 # give a random big number
         params.when = 10 # reduce LR patience
         params.txt_dim = 300
         params.vid_dim = 2048
         params.aud_dim = 120
         params.pros_dim = 35
         count = 0
-        import sys
 
         print("학습시작")
         test_loss = train_tva_1.initiate(params, train_loader, dev_loader, test_loader)    
