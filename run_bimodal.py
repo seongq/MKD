@@ -6,9 +6,9 @@ normalizations = ['true', 'false']
 
 
 # 설정
-devmode = "siljunmode"  # 또는 'debugmode'
+devmode = "siljunmode"  # 또는 'debugmode', 'siljunmode'
 folders = ["01", "02", "03", "04", "05"]
-modal_options = ["t", "v", "a"]
+modal_options = ["tv", "ta", "va"]
 
 # 🎲 실행 목록 생성: 각 폴더당 10개 (모달 무작위)
 execution_list = []

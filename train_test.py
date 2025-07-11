@@ -16,7 +16,7 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser()
     # p.add_argument("--test_second", type=str, default="second")
     # p.add_argument("--test_argument", type=str, default='test')
-    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva', "NOOO",None))
+    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva', "NOOO"))
     p.add_argument('--modals', type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
     p.add_argument('--fusion', type=str, default="mean_std", help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
     p.add_argument('--aux_fusion_tv',type=str, help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     p.add_argument('--seed', type=int, required=True)
     p.add_argument("--folder",required=True, type=str, choices=('01', '02', '03', '04', '05'))
     p.add_argument('--data_path', type=str, default='/workspace/datasets/MKD_dataset/IEMOCAP_baseline_iscross')
-    p.add_argument('--batch_size', type=int, default=32)
+    p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--rnntype', type=str, default='gru')
     p.add_argument('--rnndir', type=str, default=True,
@@ -247,7 +247,7 @@ if __name__ == '__main__':
         test_TEXTFEATURES = []
         test_LABELS = []
         for name in test_folders:
-            print('name 불렁오기')
+            # print('name 불렁오기')
             audiofeature = np.load(os.path.join(params.data_path, name, 'audio',params.audio_feature, 'sample.npy'))
             videofeature = np.load(os.path.join(params.data_path, name, 'video',params.video_feature, 'sample.npy'))
             textfeature = np.load(os.path.join(params.data_path, name, 'text',params.text_feature, 'sample.npy'))
