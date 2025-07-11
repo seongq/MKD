@@ -14,7 +14,9 @@ from dataset import *
 if __name__ == '__main__':
     # get arguments
     p = argparse.ArgumentParser()
-    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva', "NOOO"))
+    # p.add_argument("--test_second", type=str, default="second")
+    # p.add_argument("--test_argument", type=str, default='test')
+    p.add_argument("--aux_classifier", type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva', "NOOO",None))
     p.add_argument('--modals', type=str, default='tva', choices=('t', 'v', 'a', 'tv', 'ta', 'va', 'tva'))
     p.add_argument('--fusion', type=str, default="mean_std", help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
     p.add_argument('--aux_fusion_tv',type=str, help = "mean_std, summation, concatenation, FiLM (bimodal), Gated (bimodal)")
@@ -26,7 +28,7 @@ if __name__ == '__main__':
     p.add_argument("--balancing_aux_ta", type=str, help="OGM(bimodal), OGM-GE(bimodal), PMR(bimodal), MMCOSINE")
     p.add_argument("--balancing_aux_va", type=str, help="OGM(bimodal), OGM-GE(bimodal), PMR(bimodal), MMCOSINE")
 
-    p.add_argument('--devmode', type=str, choices=('debugmode','siljunmode'))
+    p.add_argument('--devmode', type=str,required=True, choices=('debugmode','siljunmode'))
     p.add_argument('--normalization', type=str2bool, default=False)
     p.add_argument('--seed', type=int, required=True)
     p.add_argument("--folder",required=True, type=str, choices=('01', '02', '03', '04', '05'))

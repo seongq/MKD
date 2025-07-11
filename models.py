@@ -52,7 +52,8 @@ class TVAModel_Self(nn.Module): # trimodal self-attn model
             self.concat_linear = nn.Linear(in_features=2 * 2 * self.params.rnnsize, out_features= self.params.rnnsize)
             self.classifier = nn.Linear(in_features= self.params.rnnsize, out_features=self.params.output_dim)
         elif len(self.params.modals) == 1:
-            self.classifier_unimodal = nn.Linear(in_features =  2 *self.params.rnnsize, out_features = self.params.output_dim)
+            self.jungri_linear = nn.Linear(in_features=2*self.params.rnnsize, out_features= self.params.rnnsize)
+            self.classifier_unimodal = nn.Linear(in_features =  self.params.rnnsize, out_features = self.params.output_dim)
 
     def forward(self, x_txt, x_vid, x_audio, emb_dp=0.25):
         # text branch
@@ -117,16 +118,19 @@ class TVAModel_Self(nn.Module): # trimodal self-attn model
 
         if self.params.modals == "v":
             x_v = x_vid2 
+            x_v = self.jungri_linear(x_v)
             y = self.classifier_unimodal(x_v) # [32, 7]
             return y, x_v
 
         if self.params.modals == "t":
             x_t = x_txt2 
+            x_t = self.jungri_linear(x_t)
             y = self.classifier_unimodal(x_t) # [32, 7]
             return y, x_t
 
         if self.params.modals == "a":
             x_a = x_audio2
+            x_a = self.jungri_linear(x_a)
             y = self.classifier_unimodal(x_a)
             return y, x_a
     

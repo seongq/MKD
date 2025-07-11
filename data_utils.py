@@ -2,6 +2,42 @@ import numpy as np
 import torch
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
+
+
+import csv
+import os
+
+def write_csv_record(csv_path, record):
+    """
+    Write a record to a CSV file. Automatically updates column headers if new keys appear.
+    """
+    # Step 1: Load existing rows if file exists
+    existing_rows = []
+    existing_fieldnames = []
+    if os.path.exists(csv_path):
+        with open(csv_path, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            existing_fieldnames = reader.fieldnames or []
+            existing_rows = list(reader)
+
+    # Step 2: Compute updated fieldnames (union of old + new)
+    new_keys = list(record.keys())
+    updated_fieldnames = sorted(set(existing_fieldnames).union(new_keys))  # sorted for consistency
+
+    # Step 3: Rewrite the file with updated fieldnames
+    with open(csv_path, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=updated_fieldnames)
+        writer.writeheader()
+
+        # Write existing rows, filling missing keys with ""
+        for row in existing_rows:
+            completed_row = {key: row.get(key, "") for key in updated_fieldnames}
+            writer.writerow(completed_row)
+
+        # Write new record
+        completed_record = {key: record.get(key, "") for key in updated_fieldnames}
+        writer.writerow(completed_record)
+
 def str2bool(v):
     if isinstance(v, bool):
         return v

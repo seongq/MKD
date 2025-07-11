@@ -3,11 +3,25 @@ from torch import nn
 import models
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from data_utils import save_model, load_model, weighted_accuracy, unweighted_accuracy, weighted_precision, unweighted_precision
+from data_utils import save_model, load_model, weighted_accuracy, unweighted_accuracy, weighted_precision, unweighted_precision, write_csv_record
 import sys
 import os
-
+import json
 import csv
+
+from datetime import datetime, timezone, timedelta
+
+# 한국 시간대 (UTC+9)
+kst = timezone(timedelta(hours=9))
+
+# 현재 시간 (KST 기준)
+now_kst = datetime.now(kst)
+
+# 원하는 포맷으로 출력
+formatted_time = str(now_kst.strftime('%Y%m%d%H%M%S'))
+
+# print(formatted_time)
+
 def initiate(hyp_params, train_loader, dev_loader, test_loader):
     tva_model = getattr(models, 'TVAModel_Self')(hyp_params)
     tva_model = tva_model.double().to('cuda')
@@ -109,6 +123,7 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
     #"""
     
     pth_dir_path ="/workspace/MKD/models"
+    folders_path = os.path.join(pth_dir_path, f"fold{hyp_params.folder}", f"seed{hyp_params.seed}_{formatted_time}")
     for epoch in range(1, hyp_params.num_epochs + 1):
         train_total_loss = train(tva_model, criterion, optimizer)
         val_loss, val_res, val_tru, _ = evaluate(tva_model, criterion, test=False)
@@ -132,27 +147,34 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
             "uwp": val_uwp,
         }
 
-        record = {**params_dict, **val_metrics, **epoch_info}
-
+        record = {**params_dict, **val_metrics, **epoch_info, **{"time": formatted_time}, **{"saved_pth": folders_path}}
         csv_path = os.path.join("results.csv")
-        write_header = not os.path.exists(csv_path)
+        write_csv_record(csv_path, record)
+        # csv_path = os.path.join("results.csv")
+        # write_header = not os.path.exists(csv_path)
 
-        with open(csv_path, 'a', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=record.keys())
-            if write_header:
-                writer.writeheader()
-            writer.writerow(record)
+        # with open(csv_path, 'a', newline='') as f:
+        #     writer = csv.DictWriter(f, fieldnames=record.keys())
+        #     if write_header:
+        #         writer.writeheader()
+        #     writer.writerow(record)
         
         
         # if val_loss < best_valid:
         if val_uwa > best_val_uwa:
             print("Saved model at epoch: ", epoch)
+
             
-            folders_path = os.path.join(pth_dir_path,'normalization',str(hyp_params.normalization), f"fold{hyp_params.folder}", f"seed{hyp_params.seed}")
             os.makedirs(name=folders_path, exist_ok=True)
-            model_path =os.path.join(folders_path, "final_exp.pth")
+            
+            # ✅ settings 저장
+            settings_path = os.path.join(folders_path, "settings.json")
+            with open(settings_path, 'w') as f:
+                json.dump(vars(hyp_params), f, indent=4)
+
+            model_path = os.path.join(folders_path, "final_exp.pth")
             save_model(tva_model, name=model_path)
-            # best_valid = val_loss
+            
             best_val_uwa = val_uwa
             es = 0
         else:
@@ -186,21 +208,25 @@ def train_model(settings, hyp_params, train_loader, dev_loader, test_loader):
     
 
     params_dict = vars(hyp_params)
-    epochs = {'epoch' : 'final'}
+    # epochs = {'epoch' : 'final'}
     metrics = {
         "wa": wa,
         "uwa": uwa,
         "wp": wp,
         "uwp": uwp,
     }
-    record = {**params_dict, **metrics, **epochs}
+    
+    record = {**vars(hyp_params), **metrics, **{'epoch': 'final'}, **{"time": formatted_time},**{"saved_pth": folders_path}}
     csv_path = os.path.join("results.csv")
-    write_header = not os.path.exists(csv_path)
-    with open(csv_path, 'a', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=record.keys())
-        if write_header:
-            writer.writeheader()
-        writer.writerow(record)
+    write_csv_record(csv_path, record)
+    # record = {**params_dict, **metrics, **epochs}
+    # csv_path = os.path.join("results.csv")
+    # write_header = not os.path.exists(csv_path)
+    # with open(csv_path, 'a', newline='') as f:
+    #     writer = csv.DictWriter(f, fieldnames=record.keys())
+    #     if write_header:
+    #         writer.writeheader()
+    #     writer.writerow(record)
     
     # import pdb
     # pdb.set_trace()

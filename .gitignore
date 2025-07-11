@@ -1,3 +1,6 @@
 models/
 __pycache__/
 *.pth
+.csv
+# run.py
+# run_unimodal.py
